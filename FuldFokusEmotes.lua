@@ -1,4 +1,4 @@
-local EMOTES = { "EmilOk", "MortenW","magitlf" }
+local EMOTES = { "EmilOk", "MortenW","magitlf","FuldFokus" }
 local BASE = "Interface\\AddOns\\FuldFokusEmotes\\Emotes\\FuldFokus\\"
 local SIZE = ":28:28"
 
