@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    branches: ["master"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: v${{ github.run_number }}
+      ZIP: FuldFokusEmotes-v${{ github.run_number }}.zip
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          mkdir -p dist/FuldFokusEmotes
+          cp -r Emotes dist/FuldFokusEmotes/
+          cp -r UI dist/FuldFokusEmotes/
+          cp FuldFokusEmotes.lua dist/FuldFokusEmotes/
+          cp FuldFokusEmotes.toc dist/FuldFokusEmotes/
+          cd dist
+          zip -r "$ZIP" FuldFokusEmotes
+
+      - name: Create Git tag
+        run: |
+          git tag $TAG
+          git push origin $TAG
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          files: dist/${{ env.ZIP }}
+          generate_release_notes: true
