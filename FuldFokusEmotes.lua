@@ -1,6 +1,27 @@
-local EMOTES = { "EmilOk", "MortenW", "magitlf" } -- Emotes
+local EMOTES = { "EmilOk", "MortenW","magitlf" }
 local BASE = "Interface\\AddOns\\FuldFokusEmotes\\Emotes\\FuldFokus\\"
 local SIZE = ":28:28"
+
+local function add_to_autocomplete(ids)
+    Emoticons_Settings = Emoticons_Settings or {}
+    Emoticons_Settings["ENABLE_AUTOCOMPLETE"] = true  
+    if AllTwitchEmoteNames then
+        local excluded = {}
+        if TwitchEmotes_ExcludedSuggestions then
+            for _, e in ipairs(TwitchEmotes_ExcludedSuggestions) do excluded[e]=true end
+        end
+        local present = {}
+        for _, name in ipairs(AllTwitchEmoteNames) do present[name]=true end
+        for _, id in ipairs(ids) do
+            if not excluded[id] and not present[id] then
+                table.insert(AllTwitchEmoteNames, id)
+            end
+        end
+        table.sort(AllTwitchEmoteNames) 
+    else
+        Emoticons_SetAutoComplete(true)  
+    end
+end
 
 local function integrate()
     TwitchEmotes_defaultpack = TwitchEmotes_defaultpack or {}
@@ -10,7 +31,7 @@ local function integrate()
 
     for _, id in ipairs(EMOTES) do
         local path = BASE .. id .. ".tga" .. SIZE
-        TwitchEmotes_defaultpack[id] = path
+        TwitchEmotes_defaultpack[id] = path  
         TwitchEmotes_emoticons[id] = id
         TwitchEmotes_emoticons[":"..id..":"] = id
     end
@@ -23,29 +44,20 @@ local function integrate()
         table.insert(TwitchEmotes_dropdown_options, { "FuldFokus" })
         catIndex = #TwitchEmotes_dropdown_options
     end
-
     local cat = TwitchEmotes_dropdown_options[catIndex]
     local present = {}
     for i = 2, #cat do present[cat[i]] = true end
     for _, id in ipairs(EMOTES) do
         if not present[id] then table.insert(cat, id) end
     end
-
     Emoticons_Settings["FAVEMOTES"] = Emoticons_Settings["FAVEMOTES"] or {}
     for i = #Emoticons_Settings["FAVEMOTES"] + 1, catIndex do
         Emoticons_Settings["FAVEMOTES"][i] = true
     end
 
-    print("|cff00ff00FuldFokusEmotes integrated!|r Added: " .. table.concat(EMOTES, ", "))
+    add_to_autocomplete(EMOTES)
 end
 
 local f = CreateFrame("Frame")
-f:RegisterEvent("ADDON_LOADED")
 f:RegisterEvent("PLAYER_LOGIN")
-f:SetScript("OnEvent", function(_, event, name)
-    if event == "ADDON_LOADED" and (name == "FoldFokusEmotes" or name == "TwitchEm  otes") then
-        integrate()
-    elseif event == "PLAYER_LOGIN" then
-        integrate()
-    end
-end)
+f:SetScript("OnEvent", integrate)
