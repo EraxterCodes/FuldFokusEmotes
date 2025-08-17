@@ -1,6 +1,6 @@
 ## Interface: 110200
-## Title: FuldFokusEmotes
-## IconTexture: Interface\AddOns\FuldFokusEmotes\Emotes\1337.tga
+## Title: |TInterface\AddOns\FuldFokusEmotes\Emotes\FuldFokus\FuldFokus:0|tFuldFokusEmotes|TInterface\AddOns\FuldFokusEmotes\Emotes\FuldFokus\FuldFokus:0|t
+## IconTexture: Interface\AddOns\FuldFokusEmotes\Emotes\FuldFokus.tga
 ## Author: Eraxter
 ## Notes: Extends TwitchEmotes with additional FuldFokus emotes.
 ## Version: 1.0
