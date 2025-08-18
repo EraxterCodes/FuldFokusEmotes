@@ -14,6 +14,7 @@ jobs:
     env:
       CF_API_KEY: ${{ secrets.CF_API_KEY }} 
       GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -23,5 +24,5 @@ jobs:
       - name: Package & Release
         uses: BigWigsMods/packager@v2
         with:
-          args: -p 1329121 -p github
+          args: -p 1329121 -w n6VPXEGd -p github
           pandoc: true
