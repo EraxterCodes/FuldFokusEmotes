@@ -2,21 +2,24 @@ name: Release
 
 on:
   push:
-    branches: ["main"]
+    tags:
+      - 'v*'   # only run on version tags
 
 permissions:
   contents: write
 
 jobs:
-  github-release:
+  build-and-release:
     runs-on: ubuntu-latest
     env:
-      TAG: v${{ github.run_number }}
-      ZIP: FuldFokusEmotes-v${{ github.run_number }}.zip
+      TAG: ${{ github.ref_name }}
+      ZIP: FuldFokusEmotes-${{ github.ref_name }}.zip
+      CF_SECRET: ${{ secrets.CF_SECRET }}
+
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  
 
       - name: Build zip
         run: |
@@ -28,13 +31,6 @@ jobs:
           cd dist
           zip -r "$ZIP" FuldFokusEmotes
 
-      - name: Create and push tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag $TAG $GITHUB_SHA
-          git push origin $TAG
-
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
@@ -43,16 +39,7 @@ jobs:
           files: dist/${{ env.ZIP }}
           generate_release_notes: true
 
-  curseforge-release:
-    needs: github-release
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-
-      - name: Run packager
+      - name: Package & upload to CurseForge
         uses: BigWigsMods/packager@v2
-        env:
-          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+        with:
+          args: -p curseforge
