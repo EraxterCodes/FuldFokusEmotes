@@ -48,6 +48,7 @@
         "VIDEO_QUALITY_LABEL6",
         "SharedTooltip_SetBackdropStyle",
         "GameTooltip_Hide",
-        "GameTooltip_AddErrorLine"
+        "GameTooltip_AddErrorLine",
+        "ItemRefTooltip"
     ]
 }
