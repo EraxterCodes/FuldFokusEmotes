@@ -91,14 +91,14 @@ local function escpattern(x)
              :gsub("%?","%%?"))
 end
 
-local function FF_Animator_UpdateEmoteInFontString(fontstring, widthOverride, heightOverride)
+local function FF_Animator_UpdateEmoteInFontString(fontstring, widthOverride, heightOverride, fixedFrame)
     local txt = fontstring:GetText()
     if not txt then return end
     for emoteTextureString in txt:gmatch("(|TInterface\\AddOns\\FuldFokusEmotes\\Emotes.-|t)") do
         local imagepath = emoteTextureString:match("|T(Interface\\AddOns\\FuldFokusEmotes\\Emotes.-%.tga).-|t")
         local animdata = TwitchEmotes_animation_metadata[imagepath]
         if animdata then
-            local framenum = TwitchEmotes_GetCurrentFrameNum(animdata)
+            local framenum = fixedFrame ~= nil and fixedFrame or TwitchEmotes_GetCurrentFrameNum(animdata)
             local replacement
             if widthOverride or heightOverride then
                 replacement = TwitchEmotes_BuildEmoteFrameStringWithDimensions(imagepath, animdata, framenum, widthOverride or animdata.frameWidth, heightOverride or animdata.frameHeight)
@@ -121,7 +121,17 @@ FF_Frame:SetScript("OnUpdate", function(_, elapsed)
         for _, frameName in pairs(CHAT_FRAMES) do
             for _, visibleLine in ipairs(_G[frameName].visibleLines) do
                 if _G[frameName]:IsShown() and visibleLine.messageInfo ~= TwitchEmotes_HoverMessageInfo then
-                    FF_Animator_UpdateEmoteInFontString(visibleLine, 28, 28)
+                    FF_Animator_UpdateEmoteInFontString(visibleLine, 28, 28, nil)
+                end
+            end
+        end
+        if EditBoxAutoCompleteBox and EditBoxAutoCompleteBox:IsShown() and EditBoxAutoCompleteBox.existingButtonCount then
+            for i = 1, EditBoxAutoCompleteBox.existingButtonCount do
+                local cBtn = EditBoxAutoComplete_GetAutoCompleteButton(i)
+                if cBtn:IsVisible() then
+                    FF_Animator_UpdateEmoteInFontString(cBtn, 16, 16, nil)
+                else
+                    break
                 end
             end
         end
