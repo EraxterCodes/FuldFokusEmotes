@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'   # only run on version tags
+      - 'v*'  
 
 permissions:
   contents: write
@@ -12,34 +12,16 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.ref_name }}
-      ZIP: FuldFokusEmotes-${{ github.ref_name }}.zip
-      CF_API_KEY: ${{ secrets.CF_SECRET }}
+      CF_API_KEY: ${{ secrets.CF_SECRET }} 
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
 
-      - name: Build zip
-        run: |
-          mkdir -p dist/FuldFokusEmotes
-          cp -r Emotes dist/FuldFokusEmotes/
-          cp -r UI dist/FuldFokusEmotes/
-          cp FuldFokusEmotes.lua dist/FuldFokusEmotes/
-          cp FuldFokusEmotes.toc dist/FuldFokusEmotes/
-          cd dist
-          zip -r "$ZIP" FuldFokusEmotes
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          files: dist/${{ env.ZIP }}
-          generate_release_notes: true
-
-      - name: Package & upload to CurseForge
+      - name: Package & Release
         uses: BigWigsMods/packager@v2
         with:
-          args: -p curseforge
+          args: -p curseforge -p github
+          pandoc: true
