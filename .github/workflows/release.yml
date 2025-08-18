@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  github-release:
     runs-on: ubuntu-latest
     env:
       TAG: v${{ github.run_number }}
@@ -43,7 +43,16 @@ jobs:
           files: dist/${{ env.ZIP }}
           generate_release_notes: true
 
-      - name: Publish to CurseForge/Wago
+  curseforge-release:
+    needs: github-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Run packager
         uses: BigWigsMods/packager@v2
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
