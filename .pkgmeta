@@ -1,3 +1,5 @@
 package-as: FuldFokusEmotes
-
 curseforge-project-id: 1329121
+
+game-versions:
+  - retail

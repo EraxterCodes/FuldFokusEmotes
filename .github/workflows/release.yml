@@ -12,7 +12,7 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      CF_API_KEY: ${{ secrets.CF_SECRET }} 
+      CF_API_KEY: ${{ secrets.CF_API_KEY }} 
       GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
@@ -23,5 +23,5 @@ jobs:
       - name: Package & Release
         uses: BigWigsMods/packager@v2
         with:
-          args: -p curseforge -p github
+          args: -p 1329121 -p github
           pandoc: true
