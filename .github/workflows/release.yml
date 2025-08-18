@@ -15,8 +15,10 @@ jobs:
       ZIP: FuldFokusEmotes-v${{ github.run_number }}.zip
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build zip
+      - name: Build zip (for GitHub Release)
         run: |
           mkdir -p dist/FuldFokusEmotes
           cp -r Emotes dist/FuldFokusEmotes/
@@ -30,6 +32,11 @@ jobs:
         run: |
           git tag $TAG
           git push origin $TAG
+
+      - name: Package & upload to CurseForge
+        uses: BigWigsMods/packager@v2
+        env:
+          CF_API_KEY: ${{ secrets.CF_SECRET }}
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
