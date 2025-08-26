@@ -54,23 +54,36 @@ local function integrate()
         }
     end
 
-    local catIndex
-    for i, cat in ipairs(TwitchEmotes_dropdown_options) do
-        if type(cat) == "table" and cat[1] == "FuldFokus" then catIndex = i break end
+    local function ensureCategory(catName)
+        for i, cat in ipairs(TwitchEmotes_dropdown_options) do
+            if type(cat) == "table" and cat[1] == catName then
+                for j = #cat, 2, -1 do cat[j] = nil end
+                return i, cat
+            end
+        end
+        table.insert(TwitchEmotes_dropdown_options, { catName })
+        return #TwitchEmotes_dropdown_options, TwitchEmotes_dropdown_options[#TwitchEmotes_dropdown_options]
     end
-    if not catIndex then
-        table.insert(TwitchEmotes_dropdown_options, { "FuldFokus" })
-        catIndex = #TwitchEmotes_dropdown_options
+
+    local perCat = 15
+    local numCats = math.ceil(#EMOTES / perCat)
+    local createdCatIndexes = {}
+
+    for c = 1, numCats do
+        local catName = (c == 1) and "FuldFokus" or ("FuldFokus" .. c)
+        local idx, cat = ensureCategory(catName)
+        table.insert(createdCatIndexes, idx)
+
+        local startIdx = (c - 1) * perCat + 1
+        local endIdx   = math.min(c * perCat, #EMOTES)
+        for i = startIdx, endIdx do
+            table.insert(cat, EMOTES[i])
+        end
     end
-    local cat = TwitchEmotes_dropdown_options[catIndex]
-    local present = {}
-    for i = 2, #cat do present[cat[i]] = true end
-    for _, id in ipairs(EMOTES) do
-        if not present[id] then table.insert(cat, id) end
-    end
+
     Emoticons_Settings["FAVEMOTES"] = Emoticons_Settings["FAVEMOTES"] or {}
-    for i = #Emoticons_Settings["FAVEMOTES"] + 1, catIndex do
-        Emoticons_Settings["FAVEMOTES"][i] = true
+    for _, catIndex in ipairs(createdCatIndexes) do
+        Emoticons_Settings["FAVEMOTES"][catIndex] = true
     end
 
     add_to_autocomplete(EMOTES)
