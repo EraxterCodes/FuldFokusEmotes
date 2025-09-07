@@ -1,9 +1,19 @@
-local EMOTES = { "CatDespair","ta","maga","Ragebait","redoing","NairyOK","nøddebrunt","manWithProbingCane","Stroxx","checkUpdates","darioClassic","ffsejr","wolt","emilFører","OnlyFans","sniffLoot","StroxxTlf","darioSmil","magexdd","mortenSur","eddyPeak","dembSmile","dembRizz","dembDespair","dembd","osmanBruh","levMette","wwwww","Scaredge","LockIn","magiBrain","GigaNæb","kvidder","wikked","MONKA","kaj","iAsk","GAMBAADDICT","fflol","ffActually","catsittingverycomfortable","pause","magiBoksen","EraxterSus","FuldDonk","EmilVinder","flyvebjørn","næb","naeb","fugl","doraGlad","doraW","skodbutik","rema","BobHehe","EmilOk","MortenW","magitlf","FuldFokus","EddySug","EmilMagi","MortenKniv","MortenSug" }
+local EMOTES = { "dogsittingverycomfortable","catsittingverycomfortablebutmentallypreparingtogobackintothemines","peepoPogClimbingTreeHard4House","Looking","catsittingverycomfortablegaming","CatDespair","ta","maga","Ragebait","NairyOK","nøddebrunt","manWithProbingCane","Stroxx","darioClassic","ffsejr","wolt","emilFører","OnlyFans","sniffLoot","StroxxTlf","darioSmil","magexdd","mortenSur","eddyPeak","dembSmile","dembRizz","dembDespair","dembd","osmanBruh","levMette","wwwww","Scaredge","LockIn","magiBrain","GigaNæb","kvidder","wikked","MONKA","kaj","iAsk","GAMBAADDICT","fflol","ffActually","catsittingverycomfortable","pause","magiBoksen","EraxterSus","FuldDonk","EmilVinder","flyvebjørn","næb","naeb","fugl","doraGlad","doraW","skodbutik","rema","BobHehe","EmilOk","MortenW","magitlf","FuldFokus","EddySug","EmilMagi","MortenKniv","MortenSug" }
 local BASE = "Interface\\AddOns\\FuldFokusEmotes\\Emotes\\FuldFokus\\"
 local SIZE = ":28:28"
 
 local ANIMATED = {
     FuldDonk = { nFrames=2, frameWidth=64, frameHeight=64, imageWidth=64, imageHeight=128, framerate=8, pingpong=false },
+}
+
+local WIDE_EMOTES = {
+    ["catsittingverycomfortablearoundacampfirewithitsfriends"] = { width = 28, height = 112 },
+    ["catsittingverycomfortablearoundacampfirewithitsfriendssingingsongsandtoastingmarshmallows"] = { width = 28, height = 112 },
+    ["catsittingverycomfortablearounda75kwdieselgeneratorwithitsfriends"] = { width = 28, height = 112 },
+    ["dotdotdot"]= { width = 28, height = 112 },
+    ["magexddWide"]= { width = 28, height = 84 },
+    ["redoing"]= { width = 28, height = 56 },
+    ["checkUpdates"] = { width = 28, height = 56 },
 }
 
 local function add_to_autocomplete(ids)
@@ -41,6 +51,16 @@ local function integrate()
         TwitchEmotes_emoticons[":"..id..":"] = id
     end
 
+    local wideIds = {}
+    for id, meta in pairs(WIDE_EMOTES) do
+        local w = (meta and meta.width) or 56   -- sensible wide default
+        local h = (meta and meta.height) or 28  -- default to normal height
+        TwitchEmotes_defaultpack[id] = BASE .. id .. ".tga:" .. w .. ":" .. h
+        TwitchEmotes_emoticons[id] = id
+        TwitchEmotes_emoticons[":"..id..":"] = id
+        table.insert(wideIds, id)
+    end
+
     for id, meta in pairs(ANIMATED) do
         local fullpath = BASE .. id .. ".tga"
         TwitchEmotes_animation_metadata[fullpath] = {
@@ -65,8 +85,12 @@ local function integrate()
         return #TwitchEmotes_dropdown_options, TwitchEmotes_dropdown_options[#TwitchEmotes_dropdown_options]
     end
 
+    local ALL_IDS = {}
+    for _, id in ipairs(EMOTES) do table.insert(ALL_IDS, id) end
+    for _, id in ipairs(wideIds) do table.insert(ALL_IDS, id) end
+
     local perCat = 15
-    local numCats = math.ceil(#EMOTES / perCat)
+    local numCats = math.ceil(#ALL_IDS / perCat)
     local createdCatIndexes = {}
 
     for c = 1, numCats do
@@ -75,9 +99,9 @@ local function integrate()
         table.insert(createdCatIndexes, idx)
 
         local startIdx = (c - 1) * perCat + 1
-        local endIdx   = math.min(c * perCat, #EMOTES)
+        local endIdx   = math.min(c * perCat, #ALL_IDS)
         for i = startIdx, endIdx do
-            table.insert(cat, EMOTES[i])
+            table.insert(cat, ALL_IDS[i])
         end
     end
 
@@ -86,8 +110,9 @@ local function integrate()
         Emoticons_Settings["FAVEMOTES"][catIndex] = true
     end
 
-    add_to_autocomplete(EMOTES)
+    add_to_autocomplete(ALL_IDS)
 end
+
 
 local function escpattern(x)
     return (x:gsub("%%","%%%%")
