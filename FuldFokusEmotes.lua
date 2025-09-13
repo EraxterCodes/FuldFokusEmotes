@@ -15,6 +15,7 @@ local WIDE_EMOTES = {
     ["magexddWide"]= { width = 28, height = 84 },
     ["redoing"]= { width = 28, height = 56 },
     ["checkUpdates"] = { width = 28, height = 56 },
+    ["cinema"] = { width = 32, height = 85 },
 }
 
 local function add_to_autocomplete(ids)
