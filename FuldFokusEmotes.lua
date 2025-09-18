@@ -1,19 +1,17 @@
-local EMOTES = { "eww","Bruhcool","strog","CLANKER","WarlockMening","Eyeroll","Flirt","SayThatAgain","cap","dogsittingverycomfortable","catsittingverycomfortablebutmentallypreparingtogobackintothemines","peepoPogClimbingTreeHard4House","Looking","catsittingverycomfortablegaming","CatDespair","ta","maga","Ragebait","NairyOK","nøddebrunt","manWithProbingCane","Stroxx","darioClassic","ffsejr","wolt","emilFører","OnlyFans","sniffLoot","StroxxTlf","darioSmil","magexdd","mortenSur","eddyPeak","dembSmile","dembRizz","dembDespair","dembd","osmanBruh","levMette","wwwww","Scaredge","LockIn","magiBrain","GigaNæb","kvidder","wikked","MONKA","kaj","iAsk","GAMBAADDICT","fflol","ffActually","catsittingverycomfortable","pause","magiBoksen","EraxterSus","FuldDonk","EmilVinder","flyvebjørn","næb","naeb","fugl","doraGlad","doraW","skodbutik","rema","BobHehe","EmilOk","MortenW","magitlf","FuldFokus","EddySug","EmilMagi","MortenKniv","MortenSug" }
+local EMOTES = { "xddWalk","HappiJam","crunch","catPunchU","tasty","EmilHuh","NOW","ALO","eww","Bruhcool","strog","CLANKER","WarlockMening","Eyeroll","Flirt","SayThatAgain","cap","dogsittingverycomfortable","catsittingverycomfortablebutmentallypreparingtogobackintothemines","peepoPogClimbingTreeHard4House","Looking","catsittingverycomfortablegaming","CatDespair","ta","maga","Ragebait","NairyOK","nøddebrunt","manWithProbingCane","Stroxx","darioClassic","ffsejr","wolt","emilFører","OnlyFans","sniffLoot","StroxxTlf","darioSmil","magexdd","mortenSur","eddyPeak","dembSmile","dembRizz","dembDespair","dembd","osmanBruh","levMette","wwwww","Scaredge","LockIn","magiBrain","GigaNæb","kvidder","wikked","MONKA","kaj","iAsk","GAMBAADDICT","fflol","ffActually","catsittingverycomfortable","pause","magiBoksen","EraxterSus","FuldDonk","EmilVinder","flyvebjørn","næb","naeb","fugl","doraGlad","doraW","skodbutik","rema","BobHehe","EmilOk","MortenW","magitlf","FuldFokus","EddySug","EmilMagi","MortenKniv","MortenSug" }
 local BASE = "Interface\\AddOns\\FuldFokusEmotes\\Emotes\\FuldFokus\\"
 local SIZE = ":28:28"
 
 local ANIMATED = {
     Eyeroll = {nFrames=20, frameWidth=32, frameHeight=32, imageWidth=32, imageHeight=640, framerate=8, pingpong=false },
     FuldDonk = { nFrames=2, frameWidth=64, frameHeight=64, imageWidth=64, imageHeight=128, framerate=8, pingpong=false },
-    CLANKER = {
-    nFrames = 83,
-    frameWidth = 50,
-    frameHeight = 32,
-    imageWidth = 50,
-    imageHeight = 2656,
-    framerate = 33,
-    pingpong = false,
-}
+    CLANKER = {nFrames = 83, frameWidth = 50, frameHeight = 32, imageWidth = 50, imageHeight = 2656, framerate = 33, pingpong = false},
+    NOW = {nFrames = 45, frameWidth = 128, frameHeight = 128, imageWidth = 128, imageHeight = 5760, framerate = 33, pingpong = false},
+    xddWalk = {nFrames = 10, frameWidth = 64, frameHeight = 64, imageWidth = 64, imageHeight = 640, framerate = 33, pingpong = false},
+    HappiJam = {nFrames = 8, frameWidth = 128, frameHeight = 128, imageWidth = 128, imageHeight = 1024, framerate = 17, pingpong = false},
+    crunch = {nFrames = 46, frameWidth = 128, frameHeight = 128, imageWidth = 128, imageHeight = 5888, framerate = 25, pingpong = false},
+    catPunchU = {nFrames = 51, frameWidth = 128, frameHeight = 128, imageWidth = 128, imageHeight = 6528, framerate = 25, pingpong = false},
+    tasty = {nFrames = 30, frameWidth = 64, frameHeight = 64, imageWidth = 64, imageHeight = 1920, framerate = 25, pingpong = false}
 }
 
 local WIDE_EMOTES = {
@@ -25,6 +23,8 @@ local WIDE_EMOTES = {
     ["redoing"]= { width = 28, height = 56 },
     ["checkUpdates"] = { width = 28, height = 56 },
     ["cinema"] = { width = 32, height = 85 },
+    ["-aura"] = {width = 32, height = 84},
+    ["+aura"] = {width = 32, height = 84}
 }
 
 local function add_to_autocomplete(ids)
