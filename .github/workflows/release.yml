@@ -25,6 +25,7 @@ jobs:
           cp FuldFokusEmotes.toc dist/FuldFokusEmotes/
           cp FFE_Details.lua dist/FuldFokusEmotes/
           cp FFE_Commands.lua dist/FuldFokusEmotes/
+          cp FFE_Options.lua dist/FuldFokusEmotes/
           cd dist 
           zip -r "$ZIP" FuldFokusEmotes
 
