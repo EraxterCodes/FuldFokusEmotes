@@ -3,12 +3,15 @@
 ## IconTexture: Interface\AddOns\FuldFokusEmotes\Emotes\FuldFokus.tga
 ## Author: Eraxter
 ## Notes: Extends TwitchEmotes with additional FuldFokus emotes.
-## Version: 1.0
+## Version: 2.0
 ## RequiredDeps: TwitchEmotes
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## X-Curse-Project-ID: 1329121
 ## X-WAGO-ID: n6VPXEGd
+## OptionalDeps: Details, DetailsFramework
+## SavedVariables: FFE_DB
 
 FuldFokusEmotes.lua
-
+FFE_Details.lua
+FFE_Commands.lua

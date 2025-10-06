@@ -49,6 +49,7 @@
         "SharedTooltip_SetBackdropStyle",
         "GameTooltip_Hide",
         "GameTooltip_AddErrorLine",
-        "ItemRefTooltip"
+        "ItemRefTooltip",
+        "SlashCmdList"
     ]
 }
