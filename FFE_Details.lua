@@ -260,20 +260,28 @@ local function installDetailsHook()
 
   -- Always prefix (some Details builds pass default=nil/true inconsistently)
   detalhes.GetNickname = function(self, name, default, silent)
-    if FFE_DB.enabled == false then
-    -- Behave like original without prefix
-    return (original and original(self, name, default, silent)) or name
+  -- Helper: pass through to original and ensure realm removal on fallback
+  local function passThrough()
+    local result = original and original(self, name, default, silent)
+    if type(result) == "string" and result ~= "" then
+      return result
+    end
+    local shown = name or ""
+    if detalhes.remove_realm_from_name and shown ~= "" then
+      shown = shown:gsub("%-.*", "")
+    end
+    return shown
   end
+
+  -- If disabled, behave like stock Details (no prefix), but still respect realm removal
+  if FFE_DB.enabled == false then
+    return passThrough()
+  end
+
+  -- Enabled: build prefix and prepend to whatever Details would show
   local key = getEmoteForPlayer(name)
   local prefix = (key and key ~= "") and (FFE.TextureStringForKey(key, FFE_DB.iconSize) .. " ") or ""
-  local result = original and original(self, name, default, silent)
-  if type(result) == "string" and result ~= "" then
-    return prefix .. result
-  end
-  if not silent then assert(type(name) == "string", "GetNickname expects a string.") end
-  local shown = name
-  if detalhes.remove_realm_from_name then shown = shown:gsub("%-.*", "") end
-  return prefix .. shown
+  return prefix .. passThrough()
 end
 end
 
