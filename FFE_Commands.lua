@@ -13,11 +13,26 @@ SlashCmdList["FFE"] = function(msg)
     print("/ffe test - print a sample icon in chat to verify rendering")
     print("/ffe list - where emotes live / how to pick a key")
     print("/ffe set <key|none> - set your Details icon (filename without extension)")
+    print("/ffe sync - rebroadcast your selection to the current group")
     print("/ffe size <n> - icon size (8..64)")
   end
 
   if cmd == "" or cmd == "help" then
     help()
+
+  elseif cmd == "sync" then
+  if not FFE.SendState then
+    print("|cffe5a472FFE|r Core not loaded yet.")
+    return
+  end
+  local chan = FFE.SendState(true)
+  if chan then
+    print("|cffe5a472FFE|r Sync sent to " .. chan .. " (" ..
+      (FFE_DB.selected == "" and "none" or FFE_DB.selected) .. "@" .. tostring(FFE_DB.iconSize) .. ")")
+  else
+    print("|cffe5a472FFE|r Could not send now; retrying in 1s...")
+    C_Timer.After(1.0, function() FFE.SendState(true) end)
+  end
 
   elseif cmd == "status" then
     local sel = FFE_DB and FFE_DB.selected or ""

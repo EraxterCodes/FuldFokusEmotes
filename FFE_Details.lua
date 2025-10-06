@@ -10,8 +10,11 @@ local function dprint(msg) if FFE.debug then ok(msg) end end
 FFE.BASE_DIR = "Interface\\AddOns\\FuldFokusEmotes\\Emotes\\FuldFokus\\"
 
 local PREFIX = "FFE"
-local playerName = UnitName("player")
-local peers = {}         -- ["Name-Realm"] = { sel="key", sz=16, at=GetTime() }
+local _pName, _pRealm = UnitFullName("player")
+local playerFullName = (_pRealm and _pRealm ~= "" and (_pName .. "-" .. _pRealm)) or _pName
+local playerName = _pName  -- realm-less
+local peersFull = {}  -- ["Name-Realm"] = { sel="key", sz=16, at=time }
+local peersBase = {}  -- ["Name"]       = { sel="key", sz=16, at=time }  -- last-writer-wins for duplicates
 local detailsHooked = false
 local ticker
 local DETAILS_ATTRIBUTE_DAMAGE = _G.DETAILS_ATTRIBUTE_DAMAGE or 1
@@ -103,13 +106,31 @@ end
 
 local function getEmoteForPlayer(name)
   if not name or name == "" then return "" end
+
+  -- explicit per-player overrides (you can store with or without realm)
   if FFE_DB.rules and FFE_DB.rules[name] then
     local k = FFE_DB.rules[name]
     if FFE.ResolveKey(k) then return k end
   end
-  if name == playerName then return FFE_DB.selected or "" end
-  local p = peers[name]
-  if p and p.sel and FFE.ResolveKey(p.sel) then return p.sel end
+
+  -- me
+  if name == playerName or name == playerFullName then
+    return FFE_DB.selected or ""
+  end
+
+  -- exact full-name hit
+  local st = peersFull[name]
+  if st and st.sel and FFE.ResolveKey(st.sel) then
+    return st.sel
+  end
+
+  -- try realm-less match
+  local base = name:gsub("%-.*", "")
+  st = peersBase[base]
+  if st and st.sel and FFE.ResolveKey(st.sel) then
+    return st.sel
+  end
+
   return ""
 end
 
@@ -127,7 +148,7 @@ local function anyAnimatedInUse()
   local fastest = 0
   fastest = math.max(fastest, fpsForKey(FFE_DB.selected))
   if FFE_DB.rules then for _, k in pairs(FFE_DB.rules) do fastest = math.max(fastest, fpsForKey(k)) end end
-  for _, st in pairs(peers) do fastest = math.max(fastest, fpsForKey(st.sel)) end
+  for _, st in pairs(peersFull) do fastest = math.max(fastest, fpsForKey(st.sel)) end
   return fastest > 0, fastest
 end
 
@@ -289,15 +310,27 @@ f:SetScript("OnEvent", function(_, event, ...)
     C_Timer.After(1.0, FFE.SendState)
 
   elseif event == "CHAT_MSG_ADDON" then
-    local prefix, msg, _, sender = ...
-    if prefix == PREFIX and sender ~= playerName then
-      local sel, sz = strsplit("|", msg or "")
-      peers[sender] = { sel = sel or "", sz = tonumber(sz) or 16, at = GetTime() }
-      dprint("Received state from " .. (sender or "?") .. ": " .. (sel or "none") .. "@" .. (sz or 16))
-      FFE.RefreshAllDisplayNames()
-      FFE.RefreshDetails()
-      FFE.UpdateTicker()
+  local prefix, msg, _, sender = ...
+  if prefix == PREFIX then
+    -- Ignore own broadcasts (compare using full name)
+    if sender == playerFullName then return end
+
+    local sel, sz = strsplit("|", msg or "")
+    local st = { sel = sel or "", sz = tonumber(sz) or 16, at = GetTime() }
+
+    -- Store by full and base name
+    peersFull[sender] = st
+    local base = sender:gsub("%-.*", "")
+    peersBase[base] = st
+
+    if FFE.debug then
+      print("|cffe5a472FFE|r Received state from " .. (sender or "?") .. ": " .. (sel or "none") .. "@" .. (sz or 16))
     end
+
+    FFE.RefreshAllDisplayNames()
+    FFE.RefreshDetails()
+    FFE.UpdateTicker()
+  end
 
   else
     -- Helpful nudges during combat/roster changes
