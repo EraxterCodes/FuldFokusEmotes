@@ -202,6 +202,21 @@ function FFE.SendState(force)
   end
 end
 
+function FFE.Clear()
+  local oldSel  = FFE_DB.selected or ""
+  local oldSize = FFE_DB.iconSize or 16
+
+  FFE_DB.selected = ""
+  FFE_DB.iconSize = 16
+
+  ok(("Cleared. Emote='none', size=%d (was '%s' @ %d)"):format(
+    FFE_DB.iconSize, (oldSel ~= "" and oldSel or "none"), oldSize))
+
+  C_Timer.After(0,   function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
+  C_Timer.After(0.2, function() FFE.SendState(true); FFE.UpdateTicker() end)
+  C_Timer.After(0.6, function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
+end
+
 function FFE.SetSelectedEmote(k)
   if k == "none" or k == "" or not k then
     FFE_DB.selected = ""

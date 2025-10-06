@@ -14,11 +14,19 @@ SlashCmdList["FFE"] = function(msg)
     print("/ffe list - where emotes live / how to pick a key")
     print("/ffe set <key|none> - set your Details icon (filename without extension)")
     print("/ffe sync - rebroadcast your selection to the current group")
+    print("/ffe clear - reset emote and size to defaults")
     print("/ffe size <n> - icon size (8..64)")
   end
 
   if cmd == "" or cmd == "help" then
     help()
+
+  elseif cmd == "clear" then
+  if not FFE.Clear then
+    print("|cffe5a472FFE|r Core not loaded yet.")
+    return
+  end
+  FFE.Clear()
 
   elseif cmd == "sync" then
   if not FFE.SendState then
