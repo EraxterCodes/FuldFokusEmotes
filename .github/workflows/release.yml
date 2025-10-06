@@ -23,7 +23,9 @@ jobs:
           cp -r UI dist/FuldFokusEmotes/
           cp FuldFokusEmotes.lua dist/FuldFokusEmotes/
           cp FuldFokusEmotes.toc dist/FuldFokusEmotes/
-          cd dist
+          cp FFE_Details.lua dist/FuldFokusEmotes/
+          cp FFE_Commands.lua dist/FuldFokusEmotes/
+          cd dist 
           zip -r "$ZIP" FuldFokusEmotes
 
       - name: Create Git tag
