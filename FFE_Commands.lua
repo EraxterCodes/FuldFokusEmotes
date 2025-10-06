@@ -16,11 +16,18 @@ SlashCmdList["FFE"] = function(msg)
     print("/ffe sync - rebroadcast your selection to the current group")
     print("/ffe clear - reset emote and size to defaults")
     print("/ffe size <n> - icon size (8..64)")
+    print("/ffe options - open the options panel")
   end
 
   if cmd == "" or cmd == "help" then
     help()
-
+  
+  elseif cmd == "options" or cmd == "opt" or cmd == "config" then
+  if FFE.OpenOptions then
+    FFE.OpenOptions()
+  else
+    print("|cffe5a472FFE|r Options panel not ready; try /reload.")
+  end
   elseif cmd == "clear" then
   if not FFE.Clear then
     print("|cffe5a472FFE|r Core not loaded yet.")

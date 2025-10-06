@@ -50,6 +50,7 @@
         "GameTooltip_Hide",
         "GameTooltip_AddErrorLine",
         "ItemRefTooltip",
-        "SlashCmdList"
+        "SlashCmdList",
+        "Settings"
     ]
 }

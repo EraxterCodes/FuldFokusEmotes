@@ -178,6 +178,7 @@ end
 
 function FFE.UpdateTicker()
   if ticker then ticker:Cancel(); ticker = nil end
+  if FFE_DB.enabled == false then return end
   local has, fps = anyAnimatedInUse()
   if has then
     local interval = 1 / math.min(fps, 30)
@@ -241,7 +242,6 @@ function FFE.SetIconSize(n)
   if not n then ok("Size must be a number between 8 and 64."); return end
   local old = FFE_DB.iconSize
   FFE_DB.iconSize = math.max(8, math.min(64, math.floor(n)))
-  ok(("Icon size: %d -> %d"):format(old or 0, FFE_DB.iconSize))
   FFE.RefreshAllDisplayNames()
   FFE.RefreshDetails()
 end
@@ -260,18 +260,21 @@ local function installDetailsHook()
 
   -- Always prefix (some Details builds pass default=nil/true inconsistently)
   detalhes.GetNickname = function(self, name, default, silent)
-    local key = getEmoteForPlayer(name)
-    local prefix = (key and key ~= "") and (FFE.TextureStringForKey(key, FFE_DB.iconSize) .. " ") or ""
-    local result = original and original(self, name, default, silent)
-
-    if type(result) == "string" and result ~= "" then
-      return prefix .. result
-    end
-    if not silent then assert(type(name) == "string", "GetNickname expects a string.") end
-    local shown = name
-    if detalhes.remove_realm_from_name then shown = shown:gsub("%-.*", "") end
-    return prefix .. shown
+    if FFE_DB.enabled == false then
+    -- Behave like original without prefix
+    return (original and original(self, name, default, silent)) or name
   end
+  local key = getEmoteForPlayer(name)
+  local prefix = (key and key ~= "") and (FFE.TextureStringForKey(key, FFE_DB.iconSize) .. " ") or ""
+  local result = original and original(self, name, default, silent)
+  if type(result) == "string" and result ~= "" then
+    return prefix .. result
+  end
+  if not silent then assert(type(name) == "string", "GetNickname expects a string.") end
+  local shown = name
+  if detalhes.remove_realm_from_name then shown = shown:gsub("%-.*", "") end
+  return prefix .. shown
+end
 end
 
 -- ---------- Events ----------
@@ -296,6 +299,7 @@ f:SetScript("OnEvent", function(_, event, ...)
       FFE_DB.iconSize = FFE_DB.iconSize or 16
       FFE_DB.selected = FFE_DB.selected or ""
       FFE_DB.rules    = FFE_DB.rules or {}
+      if FFE_DB.enabled == nil then FFE_DB.enabled = true end
       dprint("Addon loaded. Current: selected='" .. (FFE_DB.selected or "none") .. "', size=" .. tostring(FFE_DB.iconSize))
     end
 
