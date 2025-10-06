@@ -2,7 +2,7 @@ local addonName = ...
 
 FFE_DB = FFE_DB or { iconSize = 16, selected = "", rules = {} }
 FFE = FFE or {}
-FFE.debug = FFE.debug ~= false
+FFE.debug = false
 
 local function ok(msg) print("|cffe5a472FFE|r " .. tostring(msg)) end
 local function dprint(msg) if FFE.debug then ok(msg) end end
@@ -207,16 +207,17 @@ function FFE.SetSelectedEmote(k)
     FFE_DB.selected = ""
     ok("Cleared emote selection.")
   else
-    local resolved = FFE.ResolveKey(k)
     FFE_DB.selected = k
-    if resolved then
-      ok(("Emote set to '%s' (%s)."):format(k, resolved))
+    local tex = (FFE.TextureStringForKey and FFE.TextureStringForKey(k, FFE_DB.iconSize)) or ""
+    if tex ~= "" then
+      ok(("Emote set: %s  (key='%s', size=%d)"):format(tex, k, FFE_DB.iconSize))
     else
-      ok(("Emote set to '%s' (file not confirmed yet—may appear after reload)."):format(k))
+      ok(("Emote set: '%s' (texture not resolved yet—may appear after reload)"):format(k))
     end
   end
+
   C_Timer.After(0, function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
-  C_Timer.After(0.2, function() FFE.SendState(); FFE.UpdateTicker() end)
+  C_Timer.After(0.2, function() FFE.SendState(true); FFE.UpdateTicker() end)
   C_Timer.After(0.6, function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
 end
 
