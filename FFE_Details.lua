@@ -225,7 +225,6 @@ local function getEmoteForPlayer(name)
 
     -- 2) Spec-based: any Augmentation Evoker -> Auger
     local specID = FFE_GetSpecIDByName(name)
-    print(specID)
     if specID == 1473 then
       return "Auger"
     end
