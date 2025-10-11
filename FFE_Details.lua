@@ -1,6 +1,6 @@
 local addonName = ...
 
-FFE_DB = FFE_DB or { iconSize = 16, selected = "", rules = {} }
+FFE_DB = FFE_DB or { iconSize = 16, selected = "", rules = {}, animate = true }
 FFE = FFE or {}
 FFE.debug = false
 
@@ -45,6 +45,9 @@ function FFE.TextureStringForKey(key, size)
   local path = FFE.ResolveKey(key)
   if not path then return "" end
   size = size or (FFE_DB and FFE_DB.iconSize) or 16
+  if FFE_DB and FFE_DB.animate == false then
+    return ("|T%s:%d:%d|t"):format(path, size, size)
+  end
 
   local metaMap = _G.TwitchEmotes_animation_metadata
   if metaMap then
@@ -135,6 +138,9 @@ local function getEmoteForPlayer(name)
 end
 
 local function anyAnimatedInUse()
+  if FFE_DB and FFE_DB.animate == false then
+    return false, 0
+  end
   local function fpsForKey(k)
     if not k or k == "" then return 0 end
     local path = FFE.ResolveKey(k)
@@ -178,7 +184,12 @@ end
 
 function FFE.UpdateTicker()
   if ticker then ticker:Cancel(); ticker = nil end
-  if FFE_DB.enabled == false then return end
+
+  -- If the whole feature is disabled OR animations are disabled, don't create a ticker
+  if FFE_DB.enabled == false or FFE_DB.animate == false then
+    return
+  end
+
   local has, fps = anyAnimatedInUse()
   if has then
     local interval = 1 / math.min(fps, 30)
@@ -308,6 +319,7 @@ f:SetScript("OnEvent", function(_, event, ...)
       FFE_DB.selected = FFE_DB.selected or ""
       FFE_DB.rules    = FFE_DB.rules or {}
       if FFE_DB.enabled == nil then FFE_DB.enabled = true end
+      if FFE_DB.animate == nil then FFE_DB.animate = true end  -- NEW
       dprint("Addon loaded. Current: selected='" .. (FFE_DB.selected or "none") .. "', size=" .. tostring(FFE_DB.iconSize))
     end
 

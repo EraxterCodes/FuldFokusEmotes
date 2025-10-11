@@ -99,9 +99,21 @@ enable:SetScript("OnClick", function(self)
   if FFE.UpdateTicker then FFE.UpdateTicker() end
 end)
 
+-- Animate (NEW)
+local animate = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
+animate:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", 0, -12)
+animate.Text:SetText("Animate emotes in Details")
+animate:SetScript("OnClick", function(self)
+  FFE_DB.animate = self:GetChecked() and true or false
+  ok("Details emote animation " .. (FFE_DB.animate and "enabled" or "disabled") .. ".")
+  if FFE.RefreshAllDisplayNames then FFE.RefreshAllDisplayNames() end
+  if FFE.RefreshDetails then FFE.RefreshDetails() end
+  if FFE.UpdateTicker then FFE.UpdateTicker() end
+end)
+
 -- Size slider
 local size = CreateFrame("Slider", "FFE_SizeSlider", panel, "OptionsSliderTemplate")
-size:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", 0, -24)
+size:SetPoint("TOPLEFT", animate, "BOTTOMLEFT", 0, -24)
 size:SetMinMaxValues(8, 64)
 size:SetValueStep(1)
 size:SetObeyStepOnDrag(true)
@@ -191,9 +203,10 @@ end)
 -- Populate widgets from DB
 local function RefreshPanel()
   if not FFE_DB then return end
-  -- default enabled=true if nil
   if FFE_DB.enabled == nil then FFE_DB.enabled = true end
+  if FFE_DB.animate == nil then FFE_DB.animate = true end  -- NEW DEFAULT
   enable:SetChecked(FFE_DB.enabled ~= false)
+  animate:SetChecked(FFE_DB.animate ~= false)              -- NEW
   size:SetValue(FFE_DB.iconSize or 16)
   keyEdit:SetText(FFE_DB.selected or "")
   preview:SetText((FFE.TextureStringForKey and FFE.TextureStringForKey(FFE_DB.selected, FFE_DB.iconSize)) or "")
