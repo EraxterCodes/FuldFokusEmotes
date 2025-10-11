@@ -1,0 +1,1 @@
+1. FPS increases with DPS 

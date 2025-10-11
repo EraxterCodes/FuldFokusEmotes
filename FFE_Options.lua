@@ -48,7 +48,7 @@ end)
 -- Animate
 local animate = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
 animate:SetPoint("TOPLEFT", enable, "BOTTOMLEFT", 0, -12)
-animate.Text:SetText("Animate emotes in Details")
+animate.Text:SetText("Animate emotes in Details (OBS: this will increase Details update interval)")
 animate:SetScript("OnClick", function(self)
   FFE_DB.animate = self:GetChecked() and true or false
   ok("Details emote animation " .. (FFE_DB.animate and "enabled" or "disabled") .. ".")
@@ -90,7 +90,7 @@ end)
 -- Emote key label + editbox
 local keyLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 keyLabel:SetPoint("TOPLEFT", size, "BOTTOMLEFT", 0, -18)
-keyLabel:SetText("Emote key (filename without extension):")
+keyLabel:SetText("Emote:")
 
 local keyEdit = CreateFrame("EditBox", "FFE_KeyEditBox", panel, "InputBoxTemplate")
 keyEdit:SetPoint("TOPLEFT", keyLabel, "BOTTOMLEFT", 0, -6)
