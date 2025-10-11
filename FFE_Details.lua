@@ -45,67 +45,110 @@ function FFE.TextureStringForKey(key, size)
   local path = FFE.ResolveKey(key)
   if not path then return "" end
   size = size or (FFE_DB and FFE_DB.iconSize) or 16
-  if FFE_DB and FFE_DB.animate == false then
-    return ("|T%s:%d:%d|t"):format(path, size, size)
-  end
 
   local metaMap = _G.TwitchEmotes_animation_metadata
-  if metaMap then
-    local meta = metaMap[path]
-    if meta then
-      -- Preferred: use TwitchEmotes helpers, then force size
-      if type(_G.TwitchEmotes_GetCurrentFrameNum) == "function"
-         and type(_G.TwitchEmotes_BuildEmoteFrameString) == "function" then
-        local frame = _G.TwitchEmotes_GetCurrentFrameNum(meta)
-        local s = _G.TwitchEmotes_BuildEmoteFrameString(path, meta, frame, size, size)
-        -- Some builds return a |T...|t with their own width/height. Force ours:
-        if s and s:sub(1,2) == "|T" then
-          s = s:gsub("^|T([^:]+):%d+:%d+(:?.*)|t$", function(tex, rest)
-            return ("|T%s:%d:%d%s|t"):format(tex, size, size, rest or "")
-          end)
-        end
-        if s and s ~= "" then return s end
+  local meta = metaMap and metaMap[path] or nil
+
+  -- If user disabled animation, render FIRST FRAME (idx = 0) for animated sheets.
+  if (FFE_DB and FFE_DB.animate == false) and meta then
+    -- 1) Prefer TwitchEmotes helper if present
+    if type(_G.TwitchEmotes_BuildEmoteFrameString) == "function" then
+      local s = _G.TwitchEmotes_BuildEmoteFrameString(path, meta, 0, size, size) -- frame 0
+      if s and s:sub(1,2) == "|T" then
+        -- force width/height in case helper injects its own
+        s = s:gsub("^|T([^:]+):%d+:%d+(:?.*)|t$", function(tex, rest)
+          return ("|T%s:%d:%d%s|t"):format(tex, size, size, rest or "")
+        end)
       end
+      if s and s ~= "" then return s end
+    end
 
-      -- Fallback: build our own cropped frame (supports vertical or grid sheets)
-      local frames = tonumber(meta.nFrames) or tonumber(meta.frames) or 0
-      local cols   = tonumber(meta.columns) or tonumber(meta.cols) or 1
-      local rows   = tonumber(meta.rows) or 0
-      local fps    = tonumber(meta.framerate) or tonumber(meta.fps) or 0
-      local texW   = tonumber(meta.imageWidth) or tonumber(meta.texW)
-      local texH   = tonumber(meta.imageHeight) or tonumber(meta.texH)
+    -- 2) Manual crop of frame 0
+    local frames = tonumber(meta.nFrames) or tonumber(meta.frames) or 0
+    local cols   = tonumber(meta.columns) or tonumber(meta.cols) or 1
+    local rows   = tonumber(meta.rows) or 0
+    local texW   = tonumber(meta.imageWidth) or tonumber(meta.texW)
+    local texH   = tonumber(meta.imageHeight) or tonumber(meta.texH)
 
-      if frames and frames > 1 and fps and fps > 0 and texW and texH then
-        local now  = GetTime()
-        local idx  = math.floor((now * fps) % frames)
-
-        if (not rows or rows == 0) and cols and cols > 1 then
-          rows = math.ceil(frames / cols)
-        elseif (not cols or cols == 0) and rows and rows > 1 then
-          cols = math.ceil(frames / rows)
-        end
-        cols = cols or 1
-        rows = rows or frames
-
-        local frameW = math.floor(texW / cols + 0.5)
-        local frameH = math.floor(texH / rows + 0.5)
-        local col    = idx % cols
-        local row    = math.floor(idx / cols)
-
-        local left   = col * frameW
-        local right  = left + frameW
-        local top    = row * frameH
-        local bottom = top + frameH
-
-        return ("|T%s:%d:%d:0:0:%d:%d:%d:%d:%d:%d|t")
-          :format(path, size, size, texW, texH, left, right, top, bottom)
+    if frames and frames > 1 and texW and texH then
+      if (not rows or rows == 0) and cols and cols > 1 then
+        rows = math.ceil(frames / cols)
+      elseif (not cols or cols == 0) and rows and rows > 1 then
+        cols = math.ceil(frames / rows)
       end
+      cols = cols or 1
+      rows = rows or frames
+
+      local idx    = 0 -- first frame
+      local frameW = math.floor(texW / cols + 0.5)
+      local frameH = math.floor(texH / rows + 0.5)
+      local col    = idx % cols
+      local row    = math.floor(idx / cols)
+
+      local left   = col * frameW
+      local right  = left + frameW
+      local top    = row * frameH
+      local bottom = top + frameH
+
+      return ("|T%s:%d:%d:0:0:%d:%d:%d:%d:%d:%d|t")
+        :format(path, size, size, texW, texH, left, right, top, bottom)
+    end
+    -- If no meta or couldn't crop, fall through to static.
+  end
+
+  -- Animation enabled: try helpers first
+  if meta then
+    if type(_G.TwitchEmotes_GetCurrentFrameNum) == "function"
+       and type(_G.TwitchEmotes_BuildEmoteFrameString) == "function" then
+      local frame = _G.TwitchEmotes_GetCurrentFrameNum(meta)
+      local s = _G.TwitchEmotes_BuildEmoteFrameString(path, meta, frame, size, size)
+      if s and s:sub(1,2) == "|T" then
+        s = s:gsub("^|T([^:]+):%d+:%d+(:?.*)|t$", function(tex, rest)
+          return ("|T%s:%d:%d%s|t"):format(tex, size, size, rest or "")
+        end)
+      end
+      if s and s ~= "" then return s end
+    end
+
+    -- Manual animated frame (time-based)
+    local frames = tonumber(meta.nFrames) or tonumber(meta.frames) or 0
+    local cols   = tonumber(meta.columns) or tonumber(meta.cols) or 1
+    local rows   = tonumber(meta.rows) or 0
+    local fps    = tonumber(meta.framerate) or tonumber(meta.fps) or 0
+    local texW   = tonumber(meta.imageWidth) or tonumber(meta.texW)
+    local texH   = tonumber(meta.imageHeight) or tonumber(meta.texH)
+
+    if frames and frames > 1 and fps and fps > 0 and texW and texH then
+      if (not rows or rows == 0) and cols and cols > 1 then
+        rows = math.ceil(frames / cols)
+      elseif (not cols or cols == 0) and rows and rows > 1 then
+        cols = math.ceil(frames / rows)
+      end
+      cols = cols or 1
+      rows = rows or frames
+
+      local t = (GetTime and GetTime() or 0)
+      local idx = math.floor((t * fps) % frames)
+
+      local frameW = math.floor(texW / cols + 0.5)
+      local frameH = math.floor(texH / rows + 0.5)
+      local col    = idx % cols
+      local row    = math.floor(idx / cols)
+
+      local left   = col * frameW
+      local right  = left + frameW
+      local top    = row * frameH
+      local bottom = top + frameH
+
+      return ("|T%s:%d:%d:0:0:%d:%d:%d:%d:%d:%d|t")
+        :format(path, size, size, texW, texH, left, right, top, bottom)
     end
   end
 
-  -- Static
+  -- Static fallback (non-animated emotes or no meta)
   return ("|T%s:%d:%d|t"):format(path, size, size)
 end
+
 
 local function getEmoteForPlayer(name)
   if not name or name == "" then return "" end
