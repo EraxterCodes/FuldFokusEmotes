@@ -20,6 +20,69 @@ local ticker
 local DETAILS_ATTRIBUTE_DAMAGE = _G.DETAILS_ATTRIBUTE_DAMAGE or 1
 local lastSend = 0
 
+
+--- Easter eggs ---
+
+local function FFE_GetSpecIDByName(name)
+  if not name or name == "" then return nil end
+
+  local function unitMatches(u)
+    if not UnitExists(u) then return false end
+    local n, r = UnitName(u)
+    if not n then return false end
+    local full = (r and r ~= "") and (n .. "-" .. r) or n
+    return (full == name) or (n == name)
+  end
+
+  -- Find a unit token for this name
+  local unit
+  if unitMatches("player") then
+    unit = "player"
+  else
+    if IsInRaid() then
+      for i = 1, 40 do if unitMatches("raid"..i) then unit = "raid"..i; break end end
+    elseif IsInGroup() then
+      for i = 1, 4 do if unitMatches("party"..i) then unit = "party"..i; break end end
+    end
+  end
+  if not unit then return nil end
+
+  local guid = UnitGUID(unit)
+
+  -- Prefer Details' GUID->spec if available
+  if guid and _G.Details and type(_G.Details.GetSpecFromGUID) == "function" then
+    local specID = _G.Details:GetSpecFromGUID(guid)
+    if specID and specID ~= 0 then
+      return specID
+    end
+  end
+
+  -- Player's own spec
+  if unit == "player" then
+    local spec = GetSpecialization()
+    if spec then
+      local id = GetSpecializationInfo(spec)
+      if id and id ~= 0 then return id end
+    end
+  end
+
+  -- Fall back to Inspect API for party/raid units (may be 0 if not cached)
+  if type(GetInspectSpecialization) == "function" then
+    local id = GetInspectSpecialization(unit)
+    if id and id ~= 0 then return id end
+  end
+
+  return nil
+end
+
+local function FFE_IsLoxelName(name)
+  local Dokke = "Lôxel"
+  if not name or name == "" then return false end
+  name = tostring(name)
+  -- exact or substring (covers Name-Realm, surnames, etc.)
+  return (name == Dokke) or (name:find(Dokke, 1, true) ~= nil)
+end
+
 -- ---------- Public helpers ----------
 
 function FFE.ResolveKey(key)
@@ -153,6 +216,21 @@ end
 local function getEmoteForPlayer(name)
   if not name or name == "" then return "" end
 
+  -- Easter egg: if enabled, force-render Dokkeren for Lôxel, without touching DB
+  if FFE_DB and FFE_DB.easter ~= false then
+    -- 1) Name-based: Lôxel -> Dokkeren
+    if FFE_IsLoxelName(name) then
+      return "Dokkeren"
+    end
+
+    -- 2) Spec-based: any Augmentation Evoker -> Auger
+    local specID = FFE_GetSpecIDByName(name)
+    print(specID)
+    if specID == 1473 then
+      return "Auger"
+    end
+  end
+
   -- explicit per-player overrides (you can store with or without realm)
   if FFE_DB.rules and FFE_DB.rules[name] then
     local k = FFE_DB.rules[name]
@@ -164,16 +242,9 @@ local function getEmoteForPlayer(name)
     return FFE_DB.selected or ""
   end
 
-  -- exact full-name hit
+  -- someone else in group who has told us their selection
   local st = peersFull[name]
-  if st and st.sel and FFE.ResolveKey(st.sel) then
-    return st.sel
-  end
-
-  -- try realm-less match
-  local base = name:gsub("%-.*", "")
-  st = peersBase[base]
-  if st and st.sel and FFE.ResolveKey(st.sel) then
+  if st and st.sel and st.sel ~= "" then
     return st.sel
   end
 
@@ -286,7 +357,7 @@ function FFE.SetSelectedEmote(k)
     end
   end
 
-  C_Timer.After(0, function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
+  C_Timer.After(0,   function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
   C_Timer.After(0.2, function() FFE.SendState(true); FFE.UpdateTicker() end)
   C_Timer.After(0.6, function() FFE.RefreshAllDisplayNames(); FFE.RefreshDetails() end)
 end
@@ -362,7 +433,8 @@ f:SetScript("OnEvent", function(_, event, ...)
       FFE_DB.selected = FFE_DB.selected or ""
       FFE_DB.rules    = FFE_DB.rules or {}
       if FFE_DB.enabled == nil then FFE_DB.enabled = true end
-      if FFE_DB.animate == nil then FFE_DB.animate = true end  -- NEW
+      if FFE_DB.animate == nil then FFE_DB.animate = true end
+      if FFE_DB.easter == nil then FFE_DB.easter = true end
       dprint("Addon loaded. Current: selected='" .. (FFE_DB.selected or "none") .. "', size=" .. tostring(FFE_DB.iconSize))
     end
 
