@@ -26,7 +26,8 @@ local WIDE_EMOTES = {
     ["cinema"] = { width = 32, height = 85 },
     ["-aura"] = {width = 32, height = 84},
     ["+aura"] = {width = 32, height = 84},
-    ["hattrick"] = {width = 32, height = 84}
+    ["hattrick"] = {width = 32, height = 84},
+    ["Warlocks"] = {width = 32, height = 84}
 }
 
 local function add_to_autocomplete(ids)
