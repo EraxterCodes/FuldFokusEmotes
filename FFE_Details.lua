@@ -235,6 +235,24 @@ local function getEmoteForPlayer(name)
     local k = FFE_DB.rules[name]
     if FFE.ResolveKey(k) then return k end
   end
+  
+  -- Also check base name for rules if the lookup name includes realm
+  if name:find("%-") then
+    local baseName = name:gsub("%-.*", "")
+    if FFE_DB.rules and FFE_DB.rules[baseName] then
+      local k = FFE_DB.rules[baseName]
+      if FFE.ResolveKey(k) then return k end
+    end
+  else
+    -- Also check if there's a rule stored with realm for this base name
+    if FFE_DB.rules then
+      for ruleName, k in pairs(FFE_DB.rules) do
+        if ruleName:gsub("%-.*", "") == name then
+          if FFE.ResolveKey(k) then return k end
+        end
+      end
+    end
+  end
 
   -- me
   if name == playerName or name == playerFullName then
@@ -242,9 +260,18 @@ local function getEmoteForPlayer(name)
   end
 
   -- someone else in group who has told us their selection
+  -- Try full name first (for cross-realm players)
   local st = peersFull[name]
   if st and st.sel and st.sel ~= "" then
     return st.sel
+  end
+  
+  -- If no match, try base name (for same-realm players)
+  -- Extract base name if this is a full name, or use as-is if already base
+  local baseName = name:gsub("%-.*", "")
+  local baseSt = peersBase[baseName]
+  if baseSt and baseSt.sel and baseSt.sel ~= "" then
+    return baseSt.sel
   end
 
   return ""
